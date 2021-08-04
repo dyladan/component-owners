@@ -1,11 +1,30 @@
 require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 6345:
+/***/ 3109:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -16,13 +35,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core = __nccwpck_require__(2186);
-const github = __nccwpck_require__(5438);
-const utils_1 = __nccwpck_require__(1507);
+const core = __importStar(__nccwpck_require__(2186));
+const github = __importStar(__nccwpck_require__(5438));
+const utils_1 = __nccwpck_require__(918);
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         const client = github.getOctokit(core.getInput('repo-token', { required: true }));
-        const ownerFilePath = core.getInput('component-owners-file', { required: true });
+        const ownerFilePath = core.getInput('config-file', { required: true });
         const { base, head } = utils_1.getRefs();
         const config = yield utils_1.getConfig(client, base, ownerFilePath);
         const changedFiles = yield utils_1.getChangedFiles(client, base, head);
@@ -51,15 +70,34 @@ main().catch(err => {
     core.debug(err.toString());
     core.setFailed(err.message);
 });
-//# sourceMappingURL=index.js.map
+
 
 /***/ }),
 
-/***/ 1507:
+/***/ 918:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -71,9 +109,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getConfig = exports.getChangedFiles = exports.getRefs = exports.getOwners = void 0;
-const core = __nccwpck_require__(2186);
-const github = __nccwpck_require__(5438);
-const yaml = __nccwpck_require__(1917);
+const core = __importStar(__nccwpck_require__(2186));
+const github = __importStar(__nccwpck_require__(5438));
+const yaml = __importStar(__nccwpck_require__(1917));
 function getOwners(config, changedFiles) {
     return __awaiter(this, void 0, void 0, function* () {
         const components = config.components;
@@ -81,14 +119,14 @@ function getOwners(config, changedFiles) {
         for (const file of changedFiles) {
             for (const ownedPath of Object.keys(components)) {
                 if (file.filename.startsWith(ownedPath)) {
-                    const pathOwners = components[ownedPath];
+                    let pathOwners = components[ownedPath];
                     if (typeof pathOwners === "string") {
-                        owners.add(pathOwners);
+                        pathOwners = pathOwners.split(/\s+/);
                     }
-                    else {
-                        for (const owner of pathOwners) {
-                            owners.add(owner);
-                        }
+                    for (const owner of pathOwners) {
+                        if (owner == "")
+                            continue;
+                        owners.add(owner.trim());
                     }
                 }
             }
@@ -183,7 +221,7 @@ function getFileContents(client, ref, location) {
         return Buffer.from(data.content, 'base64').toString();
     });
 }
-//# sourceMappingURL=utils.js.map
+
 
 /***/ }),
 
@@ -10578,7 +10616,7 @@ module.exports = require("zlib");
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module is referenced by other modules so it can't be inlined
-/******/ 	var __webpack_exports__ = __nccwpck_require__(6345);
+/******/ 	var __webpack_exports__ = __nccwpck_require__(3109);
 /******/ 	module.exports = __webpack_exports__;
 /******/ 	
 /******/ })()
