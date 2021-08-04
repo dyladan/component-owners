@@ -25,14 +25,6 @@ async function main() {
             assignees: owners,
         });
         core.debug(JSON.stringify(addAssigneesResult));
-
-        const requestReviewersResult = await client.rest.pulls.requestReviewers({
-            owner: github.context.repo.owner,
-            repo: github.context.repo.repo,
-            pull_number: github.context.issue.number,
-            reviewers: owners,
-        });
-        core.debug(JSON.stringify(requestReviewersResult));
     }
 }
 
