@@ -2,6 +2,8 @@ import * as core from "@actions/core";
 import * as github from "@actions/github";
 import { getChangedFiles, getConfig, getOwners, getPullAuthor, getRefs, getCollaboratorLogins } from "./utils";
 
+// this is an owned file
+
 async function main() {
     const client = github.getOctokit(core.getInput('repo-token', { required: true }));
     const ownerFilePath = core.getInput('config-file', { required: true });
