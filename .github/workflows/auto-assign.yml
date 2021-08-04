@@ -3,13 +3,13 @@ on:
   pull_request:
 
 jobs:
-  hello_world_job:
+  run_self:
     runs-on: ubuntu-latest
-    name: A job to say hello
+    name: Auto Assign Owners
     steps:
       # To use this repository's private action,
       # you must check out the repository
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Hello world action step
+      - name: Self action step
         uses: ./ # Uses an action in the root directory

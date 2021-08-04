@@ -47,16 +47,6 @@ function main() {
         const changedFiles = yield utils_1.getChangedFiles(client, base, head);
         const owners = yield utils_1.getOwners(config, changedFiles);
         core.info(`${owners.length} owners found ${owners.join(" ")}`);
-        if (owners.length > 0) {
-            core.info("Adding assignees");
-            const addAssigneesResult = yield client.rest.issues.addAssignees({
-                owner: github.context.repo.owner,
-                repo: github.context.repo.repo,
-                issue_number: github.context.issue.number,
-                assignees: owners,
-            });
-            core.debug(JSON.stringify(addAssigneesResult));
-        }
         let nonCollaborators = false;
         const collaborators = yield utils_1.getCollaboratorLogins(client);
         const author = yield utils_1.getPullAuthor(client);

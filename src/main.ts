@@ -16,17 +16,6 @@ async function main() {
  
     core.info(`${owners.length} owners found ${owners.join(" ")}`);
 
-    if (owners.length > 0) {
-        core.info("Adding assignees");
-        const addAssigneesResult = await client.rest.issues.addAssignees({
-            owner: github.context.repo.owner,
-            repo: github.context.repo.repo,
-            issue_number: github.context.issue.number,
-            assignees: owners,
-        });
-        core.debug(JSON.stringify(addAssigneesResult));
-    }
-
     let nonCollaborators = false;
     const collaborators = await getCollaboratorLogins(client);
     const author = await getPullAuthor(client);
