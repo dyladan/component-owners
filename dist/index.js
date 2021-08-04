@@ -43,7 +43,7 @@ function main() {
         const client = github.getOctokit(core.getInput('repo-token', { required: true }));
         const ownerFilePath = core.getInput('config-file', { required: true });
         const { base, head } = utils_1.getRefs();
-        const config = yield utils_1.getConfig(client, base, ownerFilePath);
+        const config = yield utils_1.getConfig(client, head, ownerFilePath);
         const changedFiles = yield utils_1.getChangedFiles(client, base, head);
         const owners = yield utils_1.getOwners(config, changedFiles);
         core.info(`${owners.length} owners found ${owners.join(" ")}`);

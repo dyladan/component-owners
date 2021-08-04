@@ -8,7 +8,7 @@ async function main() {
 
     const { base, head } = getRefs();
 
-    const config = await getConfig(client, base, ownerFilePath);
+    const config = await getConfig(client, head, ownerFilePath);
 
     const changedFiles = await getChangedFiles(client, base, head);
     const owners = await getOwners(config, changedFiles);
