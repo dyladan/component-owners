@@ -48,6 +48,7 @@ function main() {
         const owners = yield utils_1.getOwners(config, changedFiles);
         core.info(`${owners.length} owners found ${owners.join(" ")}`);
         if (owners.length > 0) {
+            core.info("Adding assignees");
             const addAssigneesResult = yield client.rest.issues.addAssignees({
                 owner: github.context.repo.owner,
                 repo: github.context.repo.repo,
@@ -56,9 +57,20 @@ function main() {
             });
             core.debug(JSON.stringify(addAssigneesResult));
         }
+        const collaborators = yield utils_1.getCollaboratorLogins(client);
         const author = yield utils_1.getPullAuthor(client);
-        const reviewers = owners.filter(o => o !== author);
+        const reviewers = [];
+        for (const owner of owners) {
+            if (owner === author)
+                continue;
+            if (!collaborators.has(owner)) {
+                core.setFailed(`Reviews may only be requested from collaborators. One or more of the users or teams you specified is not a collaborator of the ${github.context.repo.owner}/${github.context.repo.repo} repository.`);
+                continue;
+            }
+            reviewers.push(owner);
+        }
         if (reviewers.length > 0) {
+            core.info("Adding reviewers");
             const requestReviewersResult = yield client.rest.pulls.requestReviewers({
                 owner: github.context.repo.owner,
                 repo: github.context.repo.repo,
@@ -111,10 +123,23 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getConfig = exports.getChangedFiles = exports.getRefs = exports.getOwners = exports.getPullAuthor = void 0;
+exports.getConfig = exports.getChangedFiles = exports.getRefs = exports.getOwners = exports.getPullAuthor = exports.getCollaboratorLogins = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 const yaml = __importStar(__nccwpck_require__(1917));
+function getCollaboratorLogins(client) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const result = yield client.rest.repos.listCollaborators({
+            owner: github.context.repo.owner,
+            repo: github.context.repo.repo,
+        });
+        if (result.status !== 200) {
+            throw new Error(`listCollaborators failed #${github.context.issue.number} ${result.status}`);
+        }
+        return new Set(result.data.map(d => d.login));
+    });
+}
+exports.getCollaboratorLogins = getCollaboratorLogins;
 function getPullAuthor(client) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {

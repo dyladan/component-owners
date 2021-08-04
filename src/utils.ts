@@ -3,6 +3,21 @@ import * as github from "@actions/github";
 import * as yaml from "js-yaml";
 import { ChangedFile, Client, Config } from "./types";
 
+export async function getCollaboratorLogins(client: Client) {
+    const result = await client.rest.repos.listCollaborators({
+        owner: github.context.repo.owner,
+        repo: github.context.repo.repo,
+    });
+
+    if (result.status !== 200) {
+        throw new Error(
+            `listCollaborators failed #${github.context.issue.number} ${result.status}`
+        );
+    }
+
+    return new Set(result.data.map(d => d.login));
+}
+
 export async function getPullAuthor(client: Client) {
     const result = await client.rest.pulls.get({
         owner: github.context.repo.owner,

@@ -1,6 +1,6 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
-import { getChangedFiles, getConfig, getOwners, getPullAuthor, getRefs } from "./utils";
+import { getChangedFiles, getConfig, getOwners, getPullAuthor, getRefs, getCollaboratorLogins } from "./utils";
 
 async function main() {
     const client = github.getOctokit(core.getInput('repo-token', { required: true }));
@@ -12,10 +12,12 @@ async function main() {
 
     const changedFiles = await getChangedFiles(client, base, head);
     const owners = await getOwners(config, changedFiles);
+
  
     core.info(`${owners.length} owners found ${owners.join(" ")}`);
 
     if (owners.length > 0) {
+        core.info("Adding assignees");
         const addAssigneesResult = await client.rest.issues.addAssignees({
             owner: github.context.repo.owner,
             repo: github.context.repo.repo,
@@ -25,10 +27,24 @@ async function main() {
         core.debug(JSON.stringify(addAssigneesResult));
     }
 
+    const collaborators = await getCollaboratorLogins(client);
     const author = await getPullAuthor(client);
-    const reviewers = owners.filter(o => o !== author)
+
+    const reviewers = []
+    for (const owner of owners) {
+        if (owner === author) continue;
+
+        if (!collaborators.has(owner)) {
+            core.setFailed(
+                `Reviews may only be requested from collaborators. One or more of the users or teams you specified is not a collaborator of the ${github.context.repo.owner}/${github.context.repo.repo} repository.`
+            )
+            continue;
+        }
+        reviewers.push(owner);
+    }
 
     if (reviewers.length > 0) {
+        core.info("Adding reviewers");
         const requestReviewersResult = await client.rest.pulls.requestReviewers({
             owner: github.context.repo.owner,
             repo: github.context.repo.repo,
