@@ -18,6 +18,7 @@ async function main() {
     core.info(owners.join("\n"));
 
     if (owners.length > 0) {
+        core.info("Adding assignees");
         const addAssigneesResult = await client.rest.issues.addAssignees({
             owner: github.context.repo.owner,
             repo: github.context.repo.repo,
@@ -25,6 +26,7 @@ async function main() {
             assignees: owners,
         });
         core.debug(JSON.stringify(addAssigneesResult));
+        core.info("Adding done");
     }
 }
 
