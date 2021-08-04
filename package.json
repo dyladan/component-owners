@@ -2,7 +2,7 @@
   "name": "auto-assign-owners",
   "version": "1.0.0",
   "description": "Automatically assign and add approvers to component owners of lerna monorepos",
-  "main": "dist/src/index.js",
+  "main": "lib/main.js",
   "scripts": {
     "prepare": "npm run compile",
     "compile": "tsc --build",
