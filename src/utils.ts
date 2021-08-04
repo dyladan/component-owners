@@ -44,16 +44,13 @@ export async function getPullAuthor(client: Client) {
 
 export async function getOwners(config: Config, changedFiles: ChangedFile[]) {
     const components = config.components;
-    const owners = new Set<string>();
+    const rootOwners = ensureList(components["/"]);
+    const owners = new Set<string>(rootOwners);
 
     for (const file of changedFiles) {
         for (const ownedPath of Object.keys(components)) {
             if (file.filename.startsWith(ownedPath)) {
-                let pathOwners = components[ownedPath];
-
-                if (typeof pathOwners === "string") {
-                    pathOwners = pathOwners.split(/\s+/);
-                }
+                let pathOwners = ensureList(components[ownedPath]);
 
                 for (const owner of pathOwners) {
                     if (owner == "") continue;
@@ -64,6 +61,13 @@ export async function getOwners(config: Config, changedFiles: ChangedFile[]) {
     }
 
     return Array.from(owners);
+}
+
+function ensureList(inp?: string | string[]): string[] {
+    if (typeof inp === "string") {
+        return inp.split(/\s+/);
+    }
+    return inp ?? [];
 }
 
 export function getRefs() {

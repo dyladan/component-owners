@@ -1,2 +1,7 @@
 components:
-  src/: dyladan
+  # Ownership can be assigned as a string
+  /: dyladan
+  
+  # or a list
+  src/:
+    - dyladan
