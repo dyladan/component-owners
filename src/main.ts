@@ -27,6 +27,7 @@ async function main() {
         core.debug(JSON.stringify(addAssigneesResult));
     }
 
+    let nonCollaborators = false;
     const collaborators = await getCollaboratorLogins(client);
     const author = await getPullAuthor(client);
 
@@ -35,9 +36,7 @@ async function main() {
         if (owner === author) continue;
 
         if (!collaborators.has(owner)) {
-            core.setFailed(
-                `Reviews may only be requested from collaborators. One or more of the users or teams you specified is not a collaborator of the ${github.context.repo.owner}/${github.context.repo.repo} repository.`
-            )
+            nonCollaborators = true;
             continue;
         }
         reviewers.push(owner);
@@ -52,6 +51,12 @@ async function main() {
             reviewers,
         });
         core.debug(JSON.stringify(requestReviewersResult));
+    }
+
+    if (nonCollaborators) {
+        core.setFailed(
+            `Reviews may only be requested from collaborators. One or more of the users or teams you specified is not a collaborator of the ${github.context.repo.owner}/${github.context.repo.repo} repository.`
+        )
     }
 }
 
