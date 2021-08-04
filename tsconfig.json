@@ -1,0 +1,32 @@
+{
+    "compilerOptions": {
+      "allowUnreachableCode": false,
+      "allowUnusedLabels": false,
+      "declaration": true,
+      "declarationMap": true,
+      "forceConsistentCasingInFileNames": true,
+      "module": "commonjs",
+      "noEmitOnError": true,
+      "noFallthroughCasesInSwitch": true,
+      "noImplicitReturns": true,
+      "noUnusedLocals": true,
+      "noImplicitOverride": true,
+      "outDir": "dist",
+      "pretty": true,
+      "rootDir": ".",
+      "sourceMap": true,
+      "strict": true,
+      "strictNullChecks": true,
+      "target": "es6",
+      "incremental": true,
+      "newLine": "LF"
+    },
+    "include": [
+      "src/**/*.ts",
+      "test/**/*.ts"
+    ],
+    "exclude": [
+      "node_modules"
+    ]
+  }
+  

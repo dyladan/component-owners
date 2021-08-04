@@ -1,0 +1,16 @@
+name: 'Auto Assign Owners'
+description: 'Automatically assign and add approvers to component owners specified in an owners file'
+
+inputs:
+  repo-token:
+    description: 'A token for the repo'
+    default: ${{ github.token }}
+    required: false
+  config-file:
+    description: 'Path to a JSON file with ownership information'
+    default: .github/COMPONENT_OWNERS.yml
+    required: false
+
+runs:
+  using: 'node12'
+  main: 'dist/src/index.js'
