@@ -156,11 +156,10 @@ exports.getPullAuthor = getPullAuthor;
 function getOwners(config, changedFiles) {
     return __awaiter(this, void 0, void 0, function* () {
         const components = config.components;
-        const rootOwners = ensureList(components["/"]);
-        const owners = new Set(rootOwners);
+        const owners = new Set();
         for (const file of changedFiles) {
             for (const ownedPath of Object.keys(components)) {
-                if (file.filename.startsWith(ownedPath)) {
+                if (match(file.filename, ownedPath)) {
                     let pathOwners = ensureList(components[ownedPath]);
                     for (const owner of pathOwners) {
                         if (owner == "")
@@ -174,6 +173,9 @@ function getOwners(config, changedFiles) {
     });
 }
 exports.getOwners = getOwners;
+function match(name, ownedPath) {
+    return name.startsWith(ownedPath.replace(/^\//, "").replace(/\/$/, ""));
+}
 function ensureList(inp) {
     if (typeof inp === "string") {
         return inp.split(/\s+/);
