@@ -46,8 +46,7 @@ function main() {
         const config = yield utils_1.getConfig(client, base, ownerFilePath);
         const changedFiles = yield utils_1.getChangedFiles(client, base, head);
         const owners = yield utils_1.getOwners(config, changedFiles);
-        core.info(`${owners.length} owners found`);
-        core.info(owners.join("\n"));
+        core.info(`${owners.length} owners found ${owners.join(" ")}`);
         if (owners.length > 0) {
             const addAssigneesResult = yield client.rest.issues.addAssignees({
                 owner: github.context.repo.owner,

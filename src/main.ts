@@ -13,8 +13,7 @@ async function main() {
     const changedFiles = await getChangedFiles(client, base, head);
     const owners = await getOwners(config, changedFiles);
  
-    core.info(`${owners.length} owners found`);
-    core.info(owners.join("\n"));
+    core.info(`${owners.length} owners found ${owners.join(" ")}`);
 
     if (owners.length > 0) {
         const addAssigneesResult = await client.rest.issues.addAssignees({
