@@ -3,6 +3,30 @@ import * as github from "@actions/github";
 import * as yaml from "js-yaml";
 import { ChangedFile, Client, Config } from "./types";
 
+export async function getPullAuthor(client: Client) {
+    const result = await client.rest.pulls.get({
+        owner: github.context.repo.owner,
+        repo: github.context.repo.repo,
+        pull_number: github.context.issue.number,
+    });
+
+    if (result.status !== 200) {
+        throw new Error(
+            `getPullAuthor failed #${github.context.issue.number} ${result.status}`
+        );
+    }
+
+    const login = result.data.user?.login;
+
+    if (!login) {
+        throw new Error(
+            `getPullAuthor user has no login #${github.context.issue.number}`
+        );
+    }
+
+    return login;
+}
+
 export async function getOwners(config: Config, changedFiles: ChangedFile[]) {
     const components = config.components;
     const owners = new Set<string>();

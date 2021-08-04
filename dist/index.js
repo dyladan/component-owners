@@ -56,11 +56,15 @@ function main() {
                 assignees: owners,
             });
             core.debug(JSON.stringify(addAssigneesResult));
+        }
+        const author = yield utils_1.getPullAuthor(client);
+        const reviewers = owners.filter(o => o !== author);
+        if (reviewers.length > 0) {
             const requestReviewersResult = yield client.rest.pulls.requestReviewers({
                 owner: github.context.repo.owner,
                 repo: github.context.repo.repo,
                 pull_number: github.context.issue.number,
-                reviewers: owners,
+                reviewers,
             });
             core.debug(JSON.stringify(requestReviewersResult));
         }
@@ -108,10 +112,29 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getConfig = exports.getChangedFiles = exports.getRefs = exports.getOwners = void 0;
+exports.getConfig = exports.getChangedFiles = exports.getRefs = exports.getOwners = exports.getPullAuthor = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 const yaml = __importStar(__nccwpck_require__(1917));
+function getPullAuthor(client) {
+    var _a;
+    return __awaiter(this, void 0, void 0, function* () {
+        const result = yield client.rest.pulls.get({
+            owner: github.context.repo.owner,
+            repo: github.context.repo.repo,
+            pull_number: github.context.issue.number,
+        });
+        if (result.status !== 200) {
+            throw new Error(`getPullAuthor failed #${github.context.issue.number} ${result.status}`);
+        }
+        const login = (_a = result.data.user) === null || _a === void 0 ? void 0 : _a.login;
+        if (!login) {
+            throw new Error(`getPullAuthor user has no login #${github.context.issue.number}`);
+        }
+        return login;
+    });
+}
+exports.getPullAuthor = getPullAuthor;
 function getOwners(config, changedFiles) {
     return __awaiter(this, void 0, void 0, function* () {
         const components = config.components;
