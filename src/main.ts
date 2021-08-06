@@ -1,6 +1,6 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
-import { getChangedFiles, getConfig, getOwners, getPullAuthor, getRefs } from "./utils";
+import { getChangedFiles, getConfig, getOldReviewers, getOwners, getPullAuthor, getRefs } from "./utils";
 
 async function main() {
     const client = github.getOctokit(core.getInput('repo-token', { required: true }));
@@ -10,15 +10,13 @@ async function main() {
 
     const { base, head } = getRefs();
 
-    // Log the base and head commits
-    core.info(`Base commit: ${base}`)
-    core.info(`Head commit: ${head}`)
+    core.debug(`Base commit: ${base}`)
+    core.debug(`Head commit: ${head}`)
 
     const config = await getConfig(client, head, ownerFilePath);
 
     const changedFiles = await getChangedFiles(client, base, head);
-    const owners = await getOwners(config, changedFiles);
-
+    const owners = getOwners(config, changedFiles);
 
     core.info(`${owners.length} owners found ${owners.join(" ")}`);
 
@@ -35,23 +33,24 @@ async function main() {
 
     const author = await getPullAuthor(client);
 
-    const reviewers = []
-    for (const owner of owners) {
-        if (owner === author) {
-            core.info("PR author is a component owner");
-            continue;
-        }
+    const reviewers = new Set<string>(owners);
+    if (reviewers.has(author)) core.info("PR author is a component owner");
+    reviewers.delete(author);
 
-        reviewers.push(owner);
+    // Do not want to re-request when reviewers have already approved/rejected
+    const oldReviewers = await getOldReviewers(client);
+    for (const reviewed of oldReviewers) {
+        if (!reviewed) continue;
+        reviewers.delete(reviewed.login);
     }
 
-    if (requestOwnerReviews && reviewers.length > 0) {
+    if (requestOwnerReviews && reviewers.size > 0) {
         core.info("Adding reviewers");
         const requestReviewersResult = await client.rest.pulls.requestReviewers({
             owner: github.context.repo.owner,
             repo: github.context.repo.repo,
             pull_number: github.context.issue.number,
-            reviewers,
+            reviewers: Array.from(reviewers),
         });
         core.debug(JSON.stringify(requestReviewersResult));
     }

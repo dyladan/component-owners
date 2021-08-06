@@ -45,12 +45,11 @@ function main() {
         const assignOwners = core.getBooleanInput('assign-owners', { required: true });
         const requestOwnerReviews = core.getBooleanInput('request-owner-reviews', { required: true });
         const { base, head } = utils_1.getRefs();
-        // Log the base and head commits
-        core.info(`Base commit: ${base}`);
-        core.info(`Head commit: ${head}`);
+        core.debug(`Base commit: ${base}`);
+        core.debug(`Head commit: ${head}`);
         const config = yield utils_1.getConfig(client, head, ownerFilePath);
         const changedFiles = yield utils_1.getChangedFiles(client, base, head);
-        const owners = yield utils_1.getOwners(config, changedFiles);
+        const owners = utils_1.getOwners(config, changedFiles);
         core.info(`${owners.length} owners found ${owners.join(" ")}`);
         if (assignOwners && owners.length > 0) {
             core.info("Adding assignees");
@@ -63,21 +62,24 @@ function main() {
             core.debug(JSON.stringify(addAssigneesResult));
         }
         const author = yield utils_1.getPullAuthor(client);
-        const reviewers = [];
-        for (const owner of owners) {
-            if (owner === author) {
-                core.info("PR author is a component owner");
+        const reviewers = new Set(owners);
+        if (reviewers.has(author))
+            core.info("PR author is a component owner");
+        reviewers.delete(author);
+        // Do not want to re-request when reviewers have already approved/rejected
+        const oldReviewers = yield utils_1.getOldReviewers(client);
+        for (const reviewed of oldReviewers) {
+            if (!reviewed)
                 continue;
-            }
-            reviewers.push(owner);
+            reviewers.delete(reviewed.login);
         }
-        if (requestOwnerReviews && reviewers.length > 0) {
+        if (requestOwnerReviews && reviewers.size > 0) {
             core.info("Adding reviewers");
             const requestReviewersResult = yield client.rest.pulls.requestReviewers({
                 owner: github.context.repo.owner,
                 repo: github.context.repo.repo,
                 pull_number: github.context.issue.number,
-                reviewers,
+                reviewers: Array.from(reviewers),
             });
             core.debug(JSON.stringify(requestReviewersResult));
         }
@@ -125,7 +127,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getConfig = exports.getChangedFiles = exports.getRefs = exports.getOwners = exports.getPullAuthor = void 0;
+exports.getOldReviewers = exports.getConfig = exports.getChangedFiles = exports.getRefs = exports.getOwners = exports.getPullAuthor = void 0;
 const github = __importStar(__nccwpck_require__(5438));
 const yaml = __importStar(__nccwpck_require__(1917));
 const path = __importStar(__nccwpck_require__(5622));
@@ -149,23 +151,21 @@ function getPullAuthor(client) {
 }
 exports.getPullAuthor = getPullAuthor;
 function getOwners(config, changedFiles) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const components = config.components;
-        const owners = new Set();
-        for (const file of changedFiles) {
-            for (const ownedPath of Object.keys(components)) {
-                if (match(file.filename, ownedPath)) {
-                    let pathOwners = ensureList(components[ownedPath]);
-                    for (const owner of pathOwners) {
-                        if (owner == "")
-                            continue;
-                        owners.add(owner.trim());
-                    }
+    const components = config.components;
+    const owners = new Set();
+    for (const file of changedFiles) {
+        for (const ownedPath of Object.keys(components)) {
+            if (match(file.filename, ownedPath)) {
+                let pathOwners = ensureList(components[ownedPath]);
+                for (const owner of pathOwners) {
+                    if (owner == "")
+                        continue;
+                    owners.add(owner.trim());
                 }
             }
         }
-        return Array.from(owners);
-    });
+    }
+    return Array.from(owners);
 }
 exports.getOwners = getOwners;
 function match(name, ownedPath) {
@@ -273,6 +273,21 @@ function getFileContents(client, ref, location) {
         return Buffer.from(data.content, 'base64').toString();
     });
 }
+function getOldReviewers(client) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const result = yield client.rest.pulls.listRequestedReviewers({
+            owner: github.context.repo.owner,
+            repo: github.context.repo.repo,
+            pull_number: github.context.issue.number,
+        });
+        // Ensure that the request was successful.
+        if (result.status !== 200) {
+            throw new Error(`getOldReviewers failed ${result.status} ${github.context.issue.number}`);
+        }
+        return result.data.users;
+    });
+}
+exports.getOldReviewers = getOldReviewers;
 
 
 /***/ }),

@@ -28,7 +28,7 @@ export async function getPullAuthor(client: Client) {
     return login;
 }
 
-export async function getOwners(config: Config, changedFiles: ChangedFile[]) {
+export function getOwners(config: Config, changedFiles: ChangedFile[]) {
     const components = config.components;
     const owners = new Set<string>();
 
@@ -178,4 +178,21 @@ async function getFileContents(client: Client, ref: string, location: string): P
     }
 
     return Buffer.from(data.content, 'base64').toString();
+}
+
+export async function getOldReviewers(client: Client) {
+    const result = await client.rest.pulls.listRequestedReviewers({
+        owner: github.context.repo.owner,
+        repo: github.context.repo.repo,
+        pull_number: github.context.issue.number,
+    });
+
+    // Ensure that the request was successful.
+    if (result.status !== 200) {
+        throw new Error(
+            `getOldReviewers failed ${result.status} ${github.context.issue.number}`
+        );
+    }
+
+    return result.data.users;
 }
