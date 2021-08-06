@@ -45,6 +45,9 @@ function main() {
         const assignOwners = core.getBooleanInput('assign-owners', { required: true });
         const requestOwnerReviews = core.getBooleanInput('request-owner-reviews', { required: true });
         const { base, head } = utils_1.getRefs();
+        // Log the base and head commits
+        core.info(`Base commit: ${base}`);
+        core.info(`Head commit: ${head}`);
         const config = yield utils_1.getConfig(client, head, ownerFilePath);
         const changedFiles = yield utils_1.getChangedFiles(client, base, head);
         const owners = yield utils_1.getOwners(config, changedFiles);
@@ -132,7 +135,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getConfig = exports.getChangedFiles = exports.getRefs = exports.getOwners = exports.getPullAuthor = exports.getCollaboratorLogins = void 0;
-const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 const yaml = __importStar(__nccwpck_require__(1917));
 const path = __importStar(__nccwpck_require__(5622));
@@ -224,9 +226,6 @@ function getRefs() {
             throw new Error(`This action only supports pull requests and pushes, ${github.context.eventName} events are not supported. ` +
                 "Please submit an issue on this action's GitHub repo if you believe this in correct.");
     }
-    // Log the base and head commits
-    core.info(`Base commit: ${base}`);
-    core.info(`Head commit: ${head}`);
     // Ensure that the base and head properties are set on the payload.
     if (!base || !head) {
         throw new Error(`The base and head commits are missing from the payload for this ${github.context.eventName} event. ` +
@@ -266,8 +265,13 @@ function getChangedFiles(client, base, head) {
 exports.getChangedFiles = getChangedFiles;
 function getConfig(client, ref, location) {
     return __awaiter(this, void 0, void 0, function* () {
-        const contents = yield getFileContents(client, ref, location);
-        return yaml.load(contents, { filename: location });
+        try {
+            const contents = yield getFileContents(client, ref, location);
+            return yaml.load(contents, { filename: location });
+        }
+        catch (err) {
+            throw new Error(`Failed to get configuration ${ref.slice(0, 7)} ${err.message} ${location}`);
+        }
     });
 }
 exports.getConfig = getConfig;

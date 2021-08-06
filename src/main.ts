@@ -5,18 +5,21 @@ import { getChangedFiles, getConfig, getOwners, getPullAuthor, getRefs, getColla
 async function main() {
     const client = github.getOctokit(core.getInput('repo-token', { required: true }));
     const ownerFilePath = core.getInput('config-file', { required: true });
-
     const assignOwners = core.getBooleanInput('assign-owners', { required: true })
     const requestOwnerReviews = core.getBooleanInput('request-owner-reviews', { required: true })
 
     const { base, head } = getRefs();
+
+    // Log the base and head commits
+    core.info(`Base commit: ${base}`)
+    core.info(`Head commit: ${head}`)
 
     const config = await getConfig(client, head, ownerFilePath);
 
     const changedFiles = await getChangedFiles(client, base, head);
     const owners = await getOwners(config, changedFiles);
 
- 
+
     core.info(`${owners.length} owners found ${owners.join(" ")}`);
 
     if (assignOwners && owners.length > 0) {
