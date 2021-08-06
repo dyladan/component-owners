@@ -34,7 +34,10 @@ Next, create your github action yml.
 ```yaml
 name: 'Component Owners'
 on:
-  pull_request:
+  # pull_request_target is suggested for projects where pull requests will be
+  # made from forked repositories. If pull_request is used in these cases,
+  # the github token will not have sufficient permission to update the PR.
+  pull_request_target:
 
 jobs:
   run_self:
