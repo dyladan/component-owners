@@ -1,5 +1,5 @@
 {
-  "name": "auto-assign-owners",
+  "name": "component-owners",
   "version": "1.0.0",
   "description": "Automatically assign and add approvers to component owners of lerna monorepos",
   "main": "lib/main.js",
@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dyladan/auto-assign-owners.git"
+    "url": "git+https://github.com/dyladan/component-owners.git"
   },
   "author": "Daniel Dyla",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/dyladan/auto-assign-owners/issues"
+    "url": "https://github.com/dyladan/component-owners/issues"
   },
-  "homepage": "https://github.com/dyladan/auto-assign-owners#readme",
+  "homepage": "https://github.com/dyladan/component-owners#readme",
   "devDependencies": {
     "@types/js-yaml": "^4.0.2",
     "@types/node": "^16.4.12",

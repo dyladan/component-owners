@@ -1,4 +1,4 @@
-# auto-assign-owners
+# component-owners
 
 Automatically assign and add approvers to component owners of lerna monorepos.
 
@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Auto Assign Owners
     steps:
-      - uses: dyladan/auto-assign-owners
+      - uses: dyladan/component-owners
         with:
           # default: .github/some_name_for_configs.yml
           config-file: .github/some_name_for_configs.yml
