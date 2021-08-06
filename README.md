@@ -1,6 +1,10 @@
 # component-owners
 
-Automatically assign and add approvers to component owners of lerna monorepos.
+Automatically add component owners as assignees and approvers to pull requests.
+
+This works very similarly to CODEOWNERS, however with CODEOWNERS all owners must have write access to the repository.
+Many open source projects wish to assign some level of ownership of individual components, but are hesitant to grant write access to those owners.
+This action only requires that component owners be collaborators on the repository or members of the organization, but does NOT require they have write access.
 
 ## Getting Started
 
@@ -37,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Auto Assign Owners
     steps:
-      - uses: dyladan/component-owners
+      - uses: dyladan/component-owners@main
         with:
           # default: .github/component_owners.yml
           config-file: .github/component_owners.yml
@@ -76,3 +80,9 @@ Determines if the component owners should be added to the pull request as assign
 **default**: `true`
 
 Determines pull request reviews should be requested from component owners.
+
+## Why not use CODEOWNERS?
+
+Great question.
+If all of your contributors have write access to your repo, CODEOWNERS is a great solution.
+If, like many open source projects, you would like to assign some ownership of a single component of your repository, but you don't want to grant those component owners write access to the repo, this action can help.
