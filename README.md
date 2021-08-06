@@ -39,8 +39,8 @@ jobs:
     steps:
       - uses: dyladan/component-owners
         with:
-          # default: .github/some_name_for_configs.yml
-          config-file: .github/some_name_for_configs.yml
+          # default: .github/component_owners.yml
+          config-file: .github/component_owners.yml
           # default: ${{ github.token }}
           repo-token: ${{ github.token }} 
           # default: true
@@ -53,7 +53,7 @@ jobs:
 
 ### `config-file`
 
-**default**: `.github/some_name_for_configs.yml`
+**default**: `.github/component_owners.yml`
 
 Path to configuration file.
 
