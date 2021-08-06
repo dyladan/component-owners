@@ -1,6 +1,7 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
 import * as yaml from "js-yaml";
+import * as path from "path";
 import { ChangedFile, Client, Config } from "./types";
 
 export async function getCollaboratorLogins(client: Client) {
@@ -63,7 +64,16 @@ export async function getOwners(config: Config, changedFiles: ChangedFile[]) {
 }
 
 function match(name: string, ownedPath: string): boolean {
-    return name.startsWith(ownedPath.replace(/^\//, "").replace(/\/$/, ""));
+    // special case for root
+    if (ownedPath === "/") return true;
+
+    // Remove leading and trailing path separator
+    ownedPath = ownedPath.replace(/^\//, "").replace(/\/$/, "");
+ 
+    const ownedPathParts = ownedPath.split(path.sep);
+    const filePathParts = name.split(path.sep).slice(0, ownedPathParts.length);
+
+    return ownedPathParts.join(path.sep) === filePathParts.join(path.sep);
 }
 
 function ensureList(inp?: string | string[]): string[] {

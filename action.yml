@@ -8,7 +8,7 @@ inputs:
     required: false
   config-file:
     description: 'Path to a JSON file with ownership information'
-    default: .github/COMPONENT_OWNERS.yml
+    default: .github/component_owners.yml
     required: false
 
 runs:

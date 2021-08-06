@@ -121,6 +121,7 @@ exports.getConfig = exports.getChangedFiles = exports.getRefs = exports.getOwner
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 const yaml = __importStar(__nccwpck_require__(1917));
+const path = __importStar(__nccwpck_require__(5622));
 function getCollaboratorLogins(client) {
     return __awaiter(this, void 0, void 0, function* () {
         const result = yield client.rest.repos.listCollaborators({
@@ -174,7 +175,14 @@ function getOwners(config, changedFiles) {
 }
 exports.getOwners = getOwners;
 function match(name, ownedPath) {
-    return name.startsWith(ownedPath.replace(/^\//, "").replace(/\/$/, ""));
+    // special case for root
+    if (ownedPath === "/")
+        return true;
+    // Remove leading and trailing path separator
+    ownedPath = ownedPath.replace(/^\//, "").replace(/\/$/, "");
+    const ownedPathParts = ownedPath.split(path.sep);
+    const filePathParts = name.split(path.sep).slice(0, ownedPathParts.length);
+    return ownedPathParts.join(path.sep) === filePathParts.join(path.sep);
 }
 function ensureList(inp) {
     if (typeof inp === "string") {
