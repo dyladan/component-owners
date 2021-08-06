@@ -107,10 +107,6 @@ export function getRefs() {
             )
     }
 
-    // Log the base and head commits
-    core.info(`Base commit: ${base}`)
-    core.info(`Head commit: ${head}`)
-
     // Ensure that the base and head properties are set on the payload.
     if (!base || !head) {
         throw new Error(
@@ -164,8 +160,12 @@ export async function getChangedFiles(client: Client, base: string, head: string
 
 
 export async function getConfig(client: Client, ref: string, location: string): Promise<Config> {
-    const contents = await getFileContents(client, ref, location);
-    return yaml.load(contents, { filename: location }) as any;
+    try {
+        const contents = await getFileContents(client, ref, location);
+        return yaml.load(contents, { filename: location }) as any;
+    } catch (err) {
+        throw new Error(`Failed to get configuration ${ref.slice(0, 7)} ${err.message} ${location}`)
+    }
 }
 
 async function getFileContents(client: Client, ref: string, location: string): Promise<string> {
