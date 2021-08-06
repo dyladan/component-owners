@@ -42,25 +42,39 @@ function main() {
     return __awaiter(this, void 0, void 0, function* () {
         const client = github.getOctokit(core.getInput('repo-token', { required: true }));
         const ownerFilePath = core.getInput('config-file', { required: true });
+        const assignOwners = core.getBooleanInput('assign-owners', { required: true });
+        const requestOwnerReviews = core.getBooleanInput('request-owner-reviews', { required: true });
         const { base, head } = utils_1.getRefs();
         const config = yield utils_1.getConfig(client, head, ownerFilePath);
         const changedFiles = yield utils_1.getChangedFiles(client, base, head);
         const owners = yield utils_1.getOwners(config, changedFiles);
         core.info(`${owners.length} owners found ${owners.join(" ")}`);
+        if (assignOwners && owners.length > 0) {
+            core.info("Adding assignees");
+            const addAssigneesResult = yield client.rest.issues.addAssignees({
+                owner: github.context.repo.owner,
+                repo: github.context.repo.repo,
+                issue_number: github.context.issue.number,
+                assignees: owners,
+            });
+            core.debug(JSON.stringify(addAssigneesResult));
+        }
         let nonCollaborators = false;
         const collaborators = yield utils_1.getCollaboratorLogins(client);
         const author = yield utils_1.getPullAuthor(client);
         const reviewers = [];
         for (const owner of owners) {
-            if (owner === author)
+            if (owner === author) {
+                core.info("PR author is a component owner");
                 continue;
+            }
             if (!collaborators.has(owner)) {
                 nonCollaborators = true;
                 continue;
             }
             reviewers.push(owner);
         }
-        if (reviewers.length > 0) {
+        if (requestOwnerReviews && reviewers.length > 0) {
             core.info("Adding reviewers");
             const requestReviewersResult = yield client.rest.pulls.requestReviewers({
                 owner: github.context.repo.owner,

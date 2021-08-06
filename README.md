@@ -28,7 +28,7 @@ components:
 Next, create your github action yml.
 
 ```yaml
-name: 'Auto Assign'
+name: 'Component Owners'
 on:
   pull_request:
 
@@ -37,9 +37,42 @@ jobs:
     runs-on: ubuntu-latest
     name: Auto Assign Owners
     steps:
-      - name: Auto Assign Reviewers
-        uses: dyladan/auto-assign-owners
+      - uses: dyladan/auto-assign-owners
         with:
-          config-file: ".github/some_name_for_configs.yml" # Only needed if you use something other than .github/component_owners.yml
-          repo-token: ${{ github.token }}
+          # default: .github/some_name_for_configs.yml
+          config-file: .github/some_name_for_configs.yml
+          # default: ${{ github.token }}
+          repo-token: ${{ github.token }} 
+          # default: true
+          assign-owners: "true"
+          # default: true
+          request-owner-reviews: "true"
 ```
+
+## Configuration
+
+### `config-file`
+
+**default**: `.github/some_name_for_configs.yml`
+
+Path to configuration file.
+
+### `repo-token`
+
+**default**: `${{ github.token }}`
+
+GitHub personal access token.
+Must have permission to read and write pull requests.
+The default `github.token` is typically sufficient.
+
+### `assign-owners`
+
+**default**: `true`
+
+Determines if the component owners should be added to the pull request as assignees.
+
+### `request-owner-reviews`
+
+**default**: `true`
+
+Determines pull request reviews should be requested from component owners.
