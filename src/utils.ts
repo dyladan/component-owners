@@ -4,21 +4,6 @@ import * as yaml from "js-yaml";
 import * as path from "path";
 import { ChangedFile, Client, Config } from "./types";
 
-export async function getCollaboratorLogins(client: Client) {
-    const result = await client.rest.repos.listCollaborators({
-        owner: github.context.repo.owner,
-        repo: github.context.repo.repo,
-    });
-
-    if (result.status !== 200) {
-        throw new Error(
-            `listCollaborators failed #${github.context.issue.number} ${result.status}`
-        );
-    }
-
-    return new Set(result.data.map(d => d.login));
-}
-
 export async function getPullAuthor(client: Client) {
     const result = await client.rest.pulls.get({
         owner: github.context.repo.owner,
@@ -69,7 +54,7 @@ function match(name: string, ownedPath: string): boolean {
 
     // Remove leading and trailing path separator
     ownedPath = ownedPath.replace(/^\//, "").replace(/\/$/, "");
- 
+
     const ownedPathParts = ownedPath.split(path.sep);
     const filePathParts = name.split(path.sep).slice(0, ownedPathParts.length);
 

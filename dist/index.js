@@ -62,17 +62,11 @@ function main() {
             });
             core.debug(JSON.stringify(addAssigneesResult));
         }
-        let nonCollaborators = false;
-        const collaborators = yield utils_1.getCollaboratorLogins(client);
         const author = yield utils_1.getPullAuthor(client);
         const reviewers = [];
         for (const owner of owners) {
             if (owner === author) {
                 core.info("PR author is a component owner");
-                continue;
-            }
-            if (!collaborators.has(owner)) {
-                nonCollaborators = true;
                 continue;
             }
             reviewers.push(owner);
@@ -86,9 +80,6 @@ function main() {
                 reviewers,
             });
             core.debug(JSON.stringify(requestReviewersResult));
-        }
-        if (nonCollaborators) {
-            core.setFailed(`Reviews may only be requested from collaborators. One or more of the users or teams you specified is not a collaborator of the ${github.context.repo.owner}/${github.context.repo.repo} repository.`);
         }
     });
 }
@@ -134,23 +125,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getConfig = exports.getChangedFiles = exports.getRefs = exports.getOwners = exports.getPullAuthor = exports.getCollaboratorLogins = void 0;
+exports.getConfig = exports.getChangedFiles = exports.getRefs = exports.getOwners = exports.getPullAuthor = void 0;
 const github = __importStar(__nccwpck_require__(5438));
 const yaml = __importStar(__nccwpck_require__(1917));
 const path = __importStar(__nccwpck_require__(5622));
-function getCollaboratorLogins(client) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const result = yield client.rest.repos.listCollaborators({
-            owner: github.context.repo.owner,
-            repo: github.context.repo.repo,
-        });
-        if (result.status !== 200) {
-            throw new Error(`listCollaborators failed #${github.context.issue.number} ${result.status}`);
-        }
-        return new Set(result.data.map(d => d.login));
-    });
-}
-exports.getCollaboratorLogins = getCollaboratorLogins;
 function getPullAuthor(client) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
