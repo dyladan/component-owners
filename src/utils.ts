@@ -78,6 +78,7 @@ export function getRefs() {
 
     switch (eventName) {
         case 'pull_request':
+        case 'pull_request_target':
             base = github.context.payload.pull_request?.base?.sha
             head = github.context.payload.pull_request?.head?.sha
             break
