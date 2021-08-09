@@ -68,9 +68,11 @@ function main() {
         reviewers.delete(author);
         // Do not want to re-request when reviewers have already approved/rejected
         const oldReviewers = yield utils_1.getOldReviewers(client);
+        core.debug(`previously reviewed: ${JSON.stringify(oldReviewers)}`);
         for (const reviewed of oldReviewers) {
             if (!reviewed)
                 continue;
+            core.info(`Skipping ${reviewed.login}`);
             reviewers.delete(reviewed.login);
         }
         if (requestOwnerReviews && reviewers.size > 0) {

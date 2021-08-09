@@ -39,8 +39,10 @@ async function main() {
 
     // Do not want to re-request when reviewers have already approved/rejected
     const oldReviewers = await getOldReviewers(client);
+    core.debug(`previously reviewed: ${JSON.stringify(oldReviewers)}`);
     for (const reviewed of oldReviewers) {
         if (!reviewed) continue;
+        core.info(`Skipping ${reviewed.login}`);
         reviewers.delete(reviewed.login);
     }
 
