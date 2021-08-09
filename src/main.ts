@@ -1,6 +1,6 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
-import { getChangedFiles, getConfig, getOldReviewers, getOwners, getPullAuthor, getRefs } from "./utils";
+import { getChangedFiles, getConfig, getOldReviews, getOwners, getPullAuthor, getRefs } from "./utils";
 
 async function main() {
     const client = github.getOctokit(core.getInput('repo-token', { required: true }));
@@ -38,12 +38,13 @@ async function main() {
     reviewers.delete(author);
 
     // Do not want to re-request when reviewers have already approved/rejected
-    const oldReviewers = await getOldReviewers(client);
-    core.debug(`previously reviewed: ${JSON.stringify(oldReviewers)}`);
-    for (const reviewed of oldReviewers) {
-        if (!reviewed) continue;
-        core.info(`Skipping ${reviewed.login}`);
-        reviewers.delete(reviewed.login);
+    const previousReviews = await getOldReviews(client);
+    core.debug(`previous reviews: ${JSON.stringify(previousReviews)}`);
+    for (const review of previousReviews) {
+        if (!review.user) continue;
+        if (!reviewers.has(review.user.login)) continue;
+        core.info(`Skipping ${review.user.login}`);
+        reviewers.delete(review.user.login);
     }
 
     if (requestOwnerReviews && reviewers.size > 0) {

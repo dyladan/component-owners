@@ -180,8 +180,8 @@ async function getFileContents(client: Client, ref: string, location: string): P
     return Buffer.from(data.content, 'base64').toString();
 }
 
-export async function getOldReviewers(client: Client) {
-    const result = await client.rest.pulls.listRequestedReviewers({
+export async function getOldReviews(client: Client) {
+    const result = await client.rest.pulls.listReviews({
         owner: github.context.repo.owner,
         repo: github.context.repo.repo,
         pull_number: github.context.issue.number,
@@ -194,5 +194,5 @@ export async function getOldReviewers(client: Client) {
         );
     }
 
-    return result.data.users;
+    return result.data;
 }
