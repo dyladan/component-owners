@@ -1,6 +1,6 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
-import { getChangedFiles, getConfig, getOldReviews, getOwners, getPullAuthor, getRefs } from "./utils";
+import { getChangedFiles, getConfig, getOwners, getPullAuthor, getRefs, getReviewers, getReviews } from "./utils";
 
 async function main() {
     const client = github.getOctokit(core.getInput('repo-token', { required: true }));
@@ -37,13 +37,20 @@ async function main() {
     if (reviewers.has(author)) core.info("PR author is a component owner");
     reviewers.delete(author);
 
+    // Do not want to re-request when reviewers have already been requested
+    const oldReviewers = await getReviewers(client);
+    for (const reviewer of oldReviewers) {
+        if (!reviewer) continue;
+        core.info(`${reviewer.login} has already been requested`);
+        reviewers.delete(reviewer.login);
+    }
+
     // Do not want to re-request when reviewers have already approved/rejected
-    const previousReviews = await getOldReviews(client);
-    core.debug(`previous reviews: ${JSON.stringify(previousReviews)}`);
+    const previousReviews = await getReviews(client);
     for (const review of previousReviews) {
         if (!review.user) continue;
         if (!reviewers.has(review.user.login)) continue;
-        core.info(`Skipping ${review.user.login}`);
+        core.info(`${review.user.login} has already reviewed`);
         reviewers.delete(review.user.login);
     }
 

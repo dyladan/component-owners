@@ -180,7 +180,24 @@ async function getFileContents(client: Client, ref: string, location: string): P
     return Buffer.from(data.content, 'base64').toString();
 }
 
-export async function getOldReviews(client: Client) {
+export async function getReviewers(client: Client) {
+    const result = await client.rest.pulls.listRequestedReviewers({
+        owner: github.context.repo.owner,
+        repo: github.context.repo.repo,
+        pull_number: github.context.issue.number,
+    });
+
+    // Ensure that the request was successful.
+    if (result.status !== 200) {
+        throw new Error(
+            `getReviewers failed ${result.status} ${github.context.issue.number}`
+        );
+    }
+
+    return result.data.users;
+}
+
+export async function getReviews(client: Client) {
     const result = await client.rest.pulls.listReviews({
         owner: github.context.repo.owner,
         repo: github.context.repo.repo,
@@ -190,9 +207,10 @@ export async function getOldReviews(client: Client) {
     // Ensure that the request was successful.
     if (result.status !== 200) {
         throw new Error(
-            `getOldReviewers failed ${result.status} ${github.context.issue.number}`
+            `getReviews failed ${result.status} ${github.context.issue.number}`
         );
     }
 
     return result.data;
 }
+

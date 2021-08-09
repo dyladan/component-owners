@@ -66,15 +66,22 @@ function main() {
         if (reviewers.has(author))
             core.info("PR author is a component owner");
         reviewers.delete(author);
+        // Do not want to re-request when reviewers have already been requested
+        const oldReviewers = yield utils_1.getReviewers(client);
+        for (const reviewer of oldReviewers) {
+            if (!reviewer)
+                continue;
+            core.info(`${reviewer.login} has already been requested`);
+            reviewers.delete(reviewer.login);
+        }
         // Do not want to re-request when reviewers have already approved/rejected
-        const previousReviews = yield utils_1.getOldReviews(client);
-        core.debug(`previous reviews: ${JSON.stringify(previousReviews)}`);
+        const previousReviews = yield utils_1.getReviews(client);
         for (const review of previousReviews) {
             if (!review.user)
                 continue;
             if (!reviewers.has(review.user.login))
                 continue;
-            core.info(`Skipping ${review.user.login}`);
+            core.info(`${review.user.login} has already reviewed`);
             reviewers.delete(review.user.login);
         }
         if (requestOwnerReviews && reviewers.size > 0) {
@@ -131,7 +138,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getOldReviews = exports.getConfig = exports.getChangedFiles = exports.getRefs = exports.getOwners = exports.getPullAuthor = void 0;
+exports.getReviews = exports.getReviewers = exports.getConfig = exports.getChangedFiles = exports.getRefs = exports.getOwners = exports.getPullAuthor = void 0;
 const github = __importStar(__nccwpck_require__(5438));
 const yaml = __importStar(__nccwpck_require__(1917));
 const path = __importStar(__nccwpck_require__(5622));
@@ -277,7 +284,22 @@ function getFileContents(client, ref, location) {
         return Buffer.from(data.content, 'base64').toString();
     });
 }
-function getOldReviews(client) {
+function getReviewers(client) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const result = yield client.rest.pulls.listRequestedReviewers({
+            owner: github.context.repo.owner,
+            repo: github.context.repo.repo,
+            pull_number: github.context.issue.number,
+        });
+        // Ensure that the request was successful.
+        if (result.status !== 200) {
+            throw new Error(`getReviewers failed ${result.status} ${github.context.issue.number}`);
+        }
+        return result.data.users;
+    });
+}
+exports.getReviewers = getReviewers;
+function getReviews(client) {
     return __awaiter(this, void 0, void 0, function* () {
         const result = yield client.rest.pulls.listReviews({
             owner: github.context.repo.owner,
@@ -286,12 +308,12 @@ function getOldReviews(client) {
         });
         // Ensure that the request was successful.
         if (result.status !== 200) {
-            throw new Error(`getOldReviewers failed ${result.status} ${github.context.issue.number}`);
+            throw new Error(`getReviews failed ${result.status} ${github.context.issue.number}`);
         }
         return result.data;
     });
 }
-exports.getOldReviews = getOldReviews;
+exports.getReviews = getReviews;
 
 
 /***/ }),
