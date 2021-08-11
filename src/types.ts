@@ -15,11 +15,3 @@ export type ChangedFile = {
     patch?: string | undefined;
     previous_filename?: string | undefined;
 };
-
-export type Config = {
-    components: Component;
-};
-
-export type Component = {
-    [path: string]: string[] | string;
-};

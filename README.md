@@ -27,6 +27,11 @@ components:
   src/list-owners.ts:
     - owner3
     - owner4
+
+# Optionally ignore some PR authors to reduce spam for your component owners
+ignored-authors:
+  - dependabot
+  - renovate-bot
 ```
 
 Next, create your github action yml.
