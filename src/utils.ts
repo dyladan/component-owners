@@ -1,8 +1,8 @@
-import * as core from "@actions/core";
 import * as github from "@actions/github";
 import * as yaml from "js-yaml";
 import * as path from "path";
-import { ChangedFile, Client, Config } from "./types";
+import type { Config } from "./models/config";
+import type { ChangedFile, Client } from "./types";
 
 export async function getPullAuthor(client: Client) {
     const result = await client.rest.pulls.get({
@@ -35,9 +35,7 @@ export function getOwners(config: Config, changedFiles: ChangedFile[]) {
     for (const file of changedFiles) {
         for (const ownedPath of Object.keys(components)) {
             if (match(file.filename, ownedPath)) {
-                let pathOwners = ensureList(components[ownedPath]);
-
-                for (const owner of pathOwners) {
+                for (const owner of components[ownedPath]) {
                     if (owner == "") continue;
                     owners.add(owner.trim());
                 }
@@ -59,13 +57,6 @@ function match(name: string, ownedPath: string): boolean {
     const filePathParts = name.split(path.sep).slice(0, ownedPathParts.length);
 
     return ownedPathParts.join(path.sep) === filePathParts.join(path.sep);
-}
-
-function ensureList(inp?: string | string[]): string[] {
-    if (typeof inp === "string") {
-        return inp.split(/\s+/);
-    }
-    return inp ?? [];
 }
 
 export function getRefs() {
@@ -144,42 +135,6 @@ export async function getChangedFiles(client: Client, base: string, head: string
     return changedFiles;
 }
 
-
-export async function getConfig(client: Client, ref: string, location: string): Promise<Config> {
-    try {
-        const contents = await getFileContents(client, ref, location);
-        return yaml.load(contents, { filename: location }) as any;
-    } catch (err) {
-        throw new Error(`Failed to get configuration ${ref.slice(0, 7)} ${err.message} ${location}`)
-    }
-}
-
-async function getFileContents(client: Client, ref: string, location: string): Promise<string> {
-    const result = await client.rest.repos.getContent({
-        owner: github.context.repo.owner,
-        repo: github.context.repo.repo,
-        path: location,
-        ref,
-    });
-
-    // Ensure that the request was successful.
-    if (result.status !== 200) {
-        throw new Error(
-            `getFileContents failed ${result.status} ${ref.slice(0, 7)} ${location}`
-        );
-    }
-
-    const data: any = result.data
-
-    if (!data.content) {
-        throw new Error(
-            `getFileContents no content ${ref.slice(0, 7)} ${location}`
-        );
-    }
-
-    return Buffer.from(data.content, 'base64').toString();
-}
-
 export async function getReviewers(client: Client) {
     const result = await client.rest.pulls.listRequestedReviewers({
         owner: github.context.repo.owner,
@@ -214,3 +169,37 @@ export async function getReviews(client: Client) {
     return result.data;
 }
 
+async function getFileContents(client: Client, ref: string, location: string): Promise<string> {
+    const result = await client.rest.repos.getContent({
+        owner: github.context.repo.owner,
+        repo: github.context.repo.repo,
+        path: location,
+        ref,
+    });
+
+    // Ensure that the request was successful.
+    if (result.status !== 200) {
+        throw new Error(
+            `getFileContents failed ${result.status} ${ref.slice(0, 7)} ${location}`
+        );
+    }
+
+    const data: any = result.data
+
+    if (!data.content) {
+        throw new Error(
+            `getFileContents no content ${ref.slice(0, 7)} ${location}`
+        );
+    }
+
+    return Buffer.from(data.content, 'base64').toString();
+}
+
+export async function loadYaml(client: Client, ref: string, location: string): Promise<unknown> {
+    try {
+        const contents = await getFileContents(client, ref, location);
+        return yaml.load(contents, { filename: location });
+    } catch (err) {
+        throw new Error(`Failed to load configuration ${ref.slice(0, 7)} ${err.message} ${location}`)
+    }
+}

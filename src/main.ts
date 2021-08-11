@@ -1,6 +1,7 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
-import { getChangedFiles, getConfig, getOwners, getPullAuthor, getRefs, getReviewers, getReviews } from "./utils";
+import { validateConfig } from "./models/config";
+import { getChangedFiles, getOwners, getPullAuthor, getRefs, getReviewers, getReviews, loadYaml } from "./utils";
 
 async function main() {
     const client = github.getOctokit(core.getInput('repo-token', { required: true }));
@@ -13,7 +14,14 @@ async function main() {
     core.debug(`Base commit: ${base}`)
     core.debug(`Head commit: ${head}`)
 
-    const config = await getConfig(client, head, ownerFilePath);
+    const configFile = await loadYaml(client, head, ownerFilePath);
+    const config = validateConfig(configFile);
+
+    const author = await getPullAuthor(client);
+
+    if (config.ignoredAuthors.has(author)) {
+        return;
+    }
 
     const changedFiles = await getChangedFiles(client, base, head);
     const owners = getOwners(config, changedFiles);
@@ -31,7 +39,6 @@ async function main() {
         core.debug(JSON.stringify(addAssigneesResult));
     }
 
-    const author = await getPullAuthor(client);
 
     const reviewers = new Set<string>(owners);
     if (reviewers.has(author)) core.info("PR author is a component owner");
