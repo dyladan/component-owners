@@ -1,13 +1,13 @@
-name: 'Auto Assign Owners'
-description: 'Automatically assign and add approvers to component owners specified in an owners file'
+name: 'Assign Reviewers'
+description: 'Assign and add approvers to github users specified in a configuration file'
 
 inputs:
-  assign-owners:
-    description: 'Add owners as assignees on the PR'
+  assign-users:
+    description: 'Add users as assignees on the PR'
     default: 'true'
     required: false
-  request-owner-reviews:
-    description: 'Request PR reviews from owners'
+  request-reviews:
+    description: 'Request PR reviews from component contributors'
     default: 'true'
     required: false
   repo-token:
@@ -15,8 +15,8 @@ inputs:
     default: ${{ github.token }}
     required: false
   config-file:
-    description: 'Path to a JSON file with ownership information'
-    default: .github/component_owners.yml
+    description: 'Path to a YAML configuration file'
+    default: .github/assign_reviewers.yml
     required: false
 
 runs:
