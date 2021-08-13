@@ -1,0 +1,5 @@
+# Test configuration
+
+components:
+  src/:
+    - dyladan
