@@ -1,7 +1,7 @@
 {
-  "name": "component-owners",
+  "name": "assign-reviewers-action",
   "version": "1.0.0",
-  "description": "Automatically assign and add approvers to component owners of lerna monorepos",
+  "description": "Assign reviewers and add approvers to github users specified in a configuration file",
   "main": "lib/main.js",
   "scripts": {
     "compile": "tsc --build && ncc build --source-map --license LICENSE",
@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dyladan/component-owners.git"
+    "url": "git+https://github.com/open-telemetry/assign-reviewers-action.git"
   },
   "author": "Daniel Dyla",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/dyladan/component-owners/issues"
+    "url": "https://github.com/open-telemetry/assign-reviewers-action/issues"
   },
-  "homepage": "https://github.com/dyladan/component-owners#readme",
+  "homepage": "https://github.com/open-telemetry/assign-reviewers-action#readme",
   "devDependencies": {
     "@types/js-yaml": "^4.0.2",
     "@types/node": "^16.4.12",

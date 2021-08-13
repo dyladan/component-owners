@@ -42,34 +42,34 @@ const utils_1 = __nccwpck_require__(918);
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         const client = github.getOctokit(core.getInput('repo-token', { required: true }));
-        const ownerFilePath = core.getInput('config-file', { required: true });
-        const assignOwners = core.getBooleanInput('assign-owners', { required: true });
-        const requestOwnerReviews = core.getBooleanInput('request-owner-reviews', { required: true });
+        const configFilePath = core.getInput('config-file', { required: true });
+        const assignUsers = core.getBooleanInput('assign-users', { required: true });
+        const requestUserReviews = core.getBooleanInput('request-user-reviews', { required: true });
         const { base, head } = utils_1.getRefs();
         core.debug(`Base commit: ${base}`);
         core.debug(`Head commit: ${head}`);
-        const configFile = yield utils_1.loadYaml(client, head, ownerFilePath);
+        const configFile = yield utils_1.loadYaml(client, head, configFilePath);
         const config = config_1.validateConfig(configFile);
         const author = yield utils_1.getPullAuthor(client);
         if (config.ignoredAuthors.has(author)) {
             return;
         }
         const changedFiles = yield utils_1.getChangedFiles(client, base, head);
-        const owners = utils_1.getOwners(config, changedFiles);
-        core.info(`${owners.length} owners found ${owners.join(" ")}`);
-        if (assignOwners && owners.length > 0) {
+        const assignees = utils_1.getAssignedUsers(config, changedFiles);
+        core.info(`${assignees.length} assigned users found ${assignees.join(" ")}`);
+        if (assignUsers && assignees.length > 0) {
             core.info("Adding assignees");
             const addAssigneesResult = yield client.rest.issues.addAssignees({
                 owner: github.context.repo.owner,
                 repo: github.context.repo.repo,
                 issue_number: github.context.issue.number,
-                assignees: owners,
+                assignees,
             });
             core.debug(JSON.stringify(addAssigneesResult));
         }
-        const reviewers = new Set(owners);
+        const reviewers = new Set(assignees);
         if (reviewers.has(author))
-            core.info("PR author is a component owner");
+            core.info("PR author cannot be a reviewer");
         reviewers.delete(author);
         // Do not want to re-request when reviewers have already been requested
         const oldReviewers = yield utils_1.getReviewers(client);
@@ -89,7 +89,7 @@ function main() {
             core.info(`${review.user.login} has already reviewed`);
             reviewers.delete(review.user.login);
         }
-        if (requestOwnerReviews && reviewers.size > 0) {
+        if (requestUserReviews && reviewers.size > 0) {
             core.info("Adding reviewers");
             const requestReviewersResult = yield client.rest.pulls.requestReviewers({
                 owner: github.context.repo.owner,
@@ -242,7 +242,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.loadYaml = exports.getReviews = exports.getReviewers = exports.getChangedFiles = exports.getRefs = exports.getOwners = exports.getPullAuthor = void 0;
+exports.loadYaml = exports.getReviews = exports.getReviewers = exports.getChangedFiles = exports.getRefs = exports.getAssignedUsers = exports.getPullAuthor = void 0;
 const github = __importStar(__nccwpck_require__(5438));
 const yaml = __importStar(__nccwpck_require__(1917));
 const path = __importStar(__nccwpck_require__(5622));
@@ -265,23 +265,23 @@ function getPullAuthor(client) {
     });
 }
 exports.getPullAuthor = getPullAuthor;
-function getOwners(config, changedFiles) {
+function getAssignedUsers(config, changedFiles) {
     const components = config.components;
-    const owners = new Set();
+    const assignedUsers = new Set();
     for (const file of changedFiles) {
         for (const ownedPath of Object.keys(components)) {
             if (match(file.filename, ownedPath)) {
-                for (const owner of components[ownedPath]) {
-                    if (owner == "")
+                for (const user of components[ownedPath]) {
+                    if (user == "")
                         continue;
-                    owners.add(owner.trim());
+                    assignedUsers.add(user.trim());
                 }
             }
         }
     }
-    return Array.from(owners);
+    return Array.from(assignedUsers);
 }
-exports.getOwners = getOwners;
+exports.getAssignedUsers = getAssignedUsers;
 function match(name, ownedPath) {
     // special case for root
     if (ownedPath === "/")

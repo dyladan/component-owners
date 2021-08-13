@@ -1,20 +1,20 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
 import { validateConfig } from "./models/config";
-import { getChangedFiles, getOwners, getPullAuthor, getRefs, getReviewers, getReviews, loadYaml } from "./utils";
+import { getChangedFiles, getAssignedUsers, getPullAuthor, getRefs, getReviewers, getReviews, loadYaml } from "./utils";
 
 async function main() {
     const client = github.getOctokit(core.getInput('repo-token', { required: true }));
-    const ownerFilePath = core.getInput('config-file', { required: true });
-    const assignOwners = core.getBooleanInput('assign-owners', { required: true })
-    const requestOwnerReviews = core.getBooleanInput('request-owner-reviews', { required: true })
+    const configFilePath = core.getInput('config-file', { required: true });
+    const assignUsers = core.getBooleanInput('assign-users', { required: true })
+    const requestUserReviews = core.getBooleanInput('request-user-reviews', { required: true })
 
     const { base, head } = getRefs();
 
     core.debug(`Base commit: ${base}`)
     core.debug(`Head commit: ${head}`)
 
-    const configFile = await loadYaml(client, head, ownerFilePath);
+    const configFile = await loadYaml(client, head, configFilePath);
     const config = validateConfig(configFile);
 
     const author = await getPullAuthor(client);
@@ -24,24 +24,24 @@ async function main() {
     }
 
     const changedFiles = await getChangedFiles(client, base, head);
-    const owners = getOwners(config, changedFiles);
+    const assignees = getAssignedUsers(config, changedFiles);
 
-    core.info(`${owners.length} owners found ${owners.join(" ")}`);
+    core.info(`${assignees.length} assigned users found ${assignees.join(" ")}`);
 
-    if (assignOwners && owners.length > 0) {
+    if (assignUsers && assignees.length > 0) {
         core.info("Adding assignees");
         const addAssigneesResult = await client.rest.issues.addAssignees({
             owner: github.context.repo.owner,
             repo: github.context.repo.repo,
             issue_number: github.context.issue.number,
-            assignees: owners,
+            assignees,
         });
         core.debug(JSON.stringify(addAssigneesResult));
     }
 
 
-    const reviewers = new Set<string>(owners);
-    if (reviewers.has(author)) core.info("PR author is a component owner");
+    const reviewers = new Set<string>(assignees);
+    if (reviewers.has(author)) core.info("PR author cannot be a reviewer");
     reviewers.delete(author);
 
     // Do not want to re-request when reviewers have already been requested
@@ -61,7 +61,7 @@ async function main() {
         reviewers.delete(review.user.login);
     }
 
-    if (requestOwnerReviews && reviewers.size > 0) {
+    if (requestUserReviews && reviewers.size > 0) {
         core.info("Adding reviewers");
         const requestReviewersResult = await client.rest.pulls.requestReviewers({
             owner: github.context.repo.owner,

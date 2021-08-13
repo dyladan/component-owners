@@ -28,22 +28,22 @@ export async function getPullAuthor(client: Client) {
     return login;
 }
 
-export function getOwners(config: Config, changedFiles: ChangedFile[]) {
+export function getAssignedUsers(config: Config, changedFiles: ChangedFile[]) {
     const components = config.components;
-    const owners = new Set<string>();
+    const assignedUsers = new Set<string>();
 
     for (const file of changedFiles) {
         for (const ownedPath of Object.keys(components)) {
             if (match(file.filename, ownedPath)) {
-                for (const owner of components[ownedPath]) {
-                    if (owner == "") continue;
-                    owners.add(owner.trim());
+                for (const user of components[ownedPath]) {
+                    if (user == "") continue;
+                    assignedUsers.add(user.trim());
                 }
             }
         }
     }
 
-    return Array.from(owners);
+    return Array.from(assignedUsers);
 }
 
 function match(name: string, ownedPath: string): boolean {
