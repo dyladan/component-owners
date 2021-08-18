@@ -68,9 +68,10 @@ function main() {
             core.debug(JSON.stringify(addAssigneesResult));
         }
         const reviewers = new Set(owners);
-        if (reviewers.has(author))
+        if (reviewers.has(author) || reviewers.has(author.toLowerCase()))
             core.info("PR author is a component owner");
         reviewers.delete(author);
+        reviewers.delete(author.toLowerCase());
         // Do not want to re-request when reviewers have already been requested
         const oldReviewers = yield utils_1.getReviewers(client);
         for (const reviewer of oldReviewers) {

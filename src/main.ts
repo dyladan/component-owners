@@ -41,8 +41,9 @@ async function main() {
 
 
     const reviewers = new Set<string>(owners);
-    if (reviewers.has(author)) core.info("PR author is a component owner");
+    if (reviewers.has(author) || reviewers.has(author.toLowerCase())) core.info("PR author is a component owner");
     reviewers.delete(author);
+    reviewers.delete(author.toLowerCase());
 
     // Do not want to re-request when reviewers have already been requested
     const oldReviewers = await getReviewers(client);
