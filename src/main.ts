@@ -1,7 +1,10 @@
-import * as core from "@actions/core";
-import * as github from "@actions/github";
-import { validateConfig } from "./models/config";
-import { getChangedFiles, getOwners, getPullAuthor, getRefs, getReviewers, getReviews, loadYaml } from "./utils";
+import { strict as assert } from 'assert';
+import * as util from 'util';
+
+import * as core from '@actions/core';
+import * as github from '@actions/github';
+import { validateConfig } from './models/config';
+import { getChangedFiles, getOwners, getPullAuthor, getRefs, getReviewers, getReviews, loadYaml } from './utils';
 
 async function main() {
     const client = github.getOctokit(core.getInput('repo-token', { required: true }));
@@ -26,22 +29,22 @@ async function main() {
     const changedFiles = await getChangedFiles(client, base, head);
     const owners = getOwners(config, changedFiles);
 
-    core.info(`${owners.length} owners found ${owners.join(" ")}`);
+    core.info(`${owners.length} owners found ${owners.join(' ')}`);
 
     if (assignOwners && owners.length > 0) {
-        core.info("Adding assignees");
+        core.info('Adding assignees');
         const addAssigneesResult = await client.rest.issues.addAssignees({
             owner: github.context.repo.owner,
             repo: github.context.repo.repo,
             issue_number: github.context.issue.number,
             assignees: owners,
         });
-        core.debug(JSON.stringify(addAssigneesResult));
+        core.debug(util.inspect(addAssigneesResult));
     }
 
 
     const reviewers = new Set<string>(owners);
-    if (reviewers.has(author) || reviewers.has(author.toLowerCase())) core.info("PR author is a component owner");
+    if (reviewers.has(author) || reviewers.has(author.toLowerCase())) core.info('PR author is a component owner');
     reviewers.delete(author);
     reviewers.delete(author.toLowerCase());
 
@@ -63,18 +66,24 @@ async function main() {
     }
 
     if (requestOwnerReviews && reviewers.size > 0) {
-        core.info("Adding reviewers");
+        core.info('Adding reviewers');
         const requestReviewersResult = await client.rest.pulls.requestReviewers({
             owner: github.context.repo.owner,
             repo: github.context.repo.repo,
             pull_number: github.context.issue.number,
             reviewers: Array.from(reviewers),
+        }).catch((err) => {
+            // Ignore the case when the owner is not a collaborator.
+            // Happens in forks and when the user hasn't yet received a write bit on the repo.
+            assert(err.message?.includes?.('Reviews may only be requested from collaborators'), err);
+            core.info(`Ignoring error: ${util.inspect(err)}`);
+            return err;
         });
-        core.debug(JSON.stringify(requestReviewersResult));
+        core.debug(util.inspect(requestReviewersResult));
     }
 }
 
 main().catch(err => {
-    core.debug(err.toString());
+    core.debug(util.inspect(err));
     core.setFailed(err.message);
 });
