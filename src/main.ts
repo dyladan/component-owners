@@ -1,4 +1,6 @@
 import { strict as assert } from 'assert';
+import * as util from 'util';
+
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 import { validateConfig } from './models/config';
@@ -37,7 +39,7 @@ async function main() {
             issue_number: github.context.issue.number,
             assignees: owners,
         });
-        core.debug(JSON.stringify(addAssigneesResult));
+        core.debug(util.inspect(addAssigneesResult));
     }
 
 
@@ -74,14 +76,14 @@ async function main() {
             // Ignore the case when the owner is not a collaborator.
             // Happens in forks and when the user hasn't yet received a write bit on the repo.
             assert(err.message?.includes?.('Reviews may only be requested from collaborators'), err);
-            core.info(`Ignoring error: ${err.toString()}`);
+            core.info(`Ignoring error: ${util.inspect(err)}`);
             return err;
         });
-        core.debug(JSON.stringify(requestReviewersResult));
+        core.debug(util.inspect(requestReviewersResult));
     }
 }
 
 main().catch(err => {
-    core.debug(err.toString());
+    core.debug(util.inspect(err));
     core.setFailed(err.message);
 });
