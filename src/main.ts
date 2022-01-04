@@ -1,8 +1,8 @@
 import { strict as assert } from 'assert';
-import * as core from "@actions/core";
-import * as github from "@actions/github";
-import { validateConfig } from "./models/config";
-import { getChangedFiles, getOwners, getPullAuthor, getRefs, getReviewers, getReviews, loadYaml } from "./utils";
+import * as core from '@actions/core';
+import * as github from '@actions/github';
+import { validateConfig } from './models/config';
+import { getChangedFiles, getOwners, getPullAuthor, getRefs, getReviewers, getReviews, loadYaml } from './utils';
 
 async function main() {
     const client = github.getOctokit(core.getInput('repo-token', { required: true }));
@@ -27,10 +27,10 @@ async function main() {
     const changedFiles = await getChangedFiles(client, base, head);
     const owners = getOwners(config, changedFiles);
 
-    core.info(`${owners.length} owners found ${owners.join(" ")}`);
+    core.info(`${owners.length} owners found ${owners.join(' ')}`);
 
     if (assignOwners && owners.length > 0) {
-        core.info("Adding assignees");
+        core.info('Adding assignees');
         const addAssigneesResult = await client.rest.issues.addAssignees({
             owner: github.context.repo.owner,
             repo: github.context.repo.repo,
@@ -42,7 +42,7 @@ async function main() {
 
 
     const reviewers = new Set<string>(owners);
-    if (reviewers.has(author) || reviewers.has(author.toLowerCase())) core.info("PR author is a component owner");
+    if (reviewers.has(author) || reviewers.has(author.toLowerCase())) core.info('PR author is a component owner');
     reviewers.delete(author);
     reviewers.delete(author.toLowerCase());
 
@@ -64,7 +64,7 @@ async function main() {
     }
 
     if (requestOwnerReviews && reviewers.size > 0) {
-        core.info("Adding reviewers");
+        core.info('Adding reviewers');
         const requestReviewersResult = await client.rest.pulls.requestReviewers({
             owner: github.context.repo.owner,
             repo: github.context.repo.repo,
