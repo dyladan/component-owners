@@ -1,3 +1,4 @@
+import { strict as assert } from 'assert';
 import * as core from "@actions/core";
 import * as github from "@actions/github";
 import { validateConfig } from "./models/config";
@@ -69,6 +70,12 @@ async function main() {
             repo: github.context.repo.repo,
             pull_number: github.context.issue.number,
             reviewers: Array.from(reviewers),
+        }).catch((err) => {
+            // Ignore the case when the owner is not a collaborator.
+            // Happens in forks and when the user hasn't yet received a write bit on the repo.
+            assert(err.message?.includes?.('Reviews may only be requested from collaborators'), err);
+            core.info(`Ignoring error: ${err.toString()}`);
+            return err;
         });
         core.debug(JSON.stringify(requestReviewersResult));
     }
