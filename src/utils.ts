@@ -114,15 +114,6 @@ export async function getChangedFiles(client: Client, base: string, head: string
         )
     }
 
-    // Ensure that the head commit is ahead of the base commit.
-    if (compareResponse.data.status !== 'ahead') {
-        throw new Error(
-            `The head commit for this ${github.context.eventName} event is not ahead of the base commit. ` +
-            "Please submit an issue on this action's GitHub repo."
-        )
-    }
-
-
     const changedFiles = compareResponse.data.files;
 
     if (!changedFiles) {
