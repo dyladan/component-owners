@@ -35,6 +35,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+const assert_1 = __nccwpck_require__(2357);
+const util = __importStar(__nccwpck_require__(1669));
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 const config_1 = __nccwpck_require__(1583);
@@ -56,20 +58,20 @@ function main() {
         }
         const changedFiles = yield utils_1.getChangedFiles(client, base, head);
         const owners = utils_1.getOwners(config, changedFiles);
-        core.info(`${owners.length} owners found ${owners.join(" ")}`);
+        core.info(`${owners.length} owners found ${owners.join(' ')}`);
         if (assignOwners && owners.length > 0) {
-            core.info("Adding assignees");
+            core.info('Adding assignees');
             const addAssigneesResult = yield client.rest.issues.addAssignees({
                 owner: github.context.repo.owner,
                 repo: github.context.repo.repo,
                 issue_number: github.context.issue.number,
                 assignees: owners,
             });
-            core.debug(JSON.stringify(addAssigneesResult));
+            core.debug(util.inspect(addAssigneesResult));
         }
         const reviewers = new Set(owners);
         if (reviewers.has(author) || reviewers.has(author.toLowerCase()))
-            core.info("PR author is a component owner");
+            core.info('PR author is a component owner');
         reviewers.delete(author);
         reviewers.delete(author.toLowerCase());
         // Do not want to re-request when reviewers have already been requested
@@ -91,19 +93,26 @@ function main() {
             reviewers.delete(review.user.login);
         }
         if (requestOwnerReviews && reviewers.size > 0) {
-            core.info("Adding reviewers");
+            core.info('Adding reviewers');
             const requestReviewersResult = yield client.rest.pulls.requestReviewers({
                 owner: github.context.repo.owner,
                 repo: github.context.repo.repo,
                 pull_number: github.context.issue.number,
                 reviewers: Array.from(reviewers),
+            }).catch((err) => {
+                var _a, _b;
+                // Ignore the case when the owner is not a collaborator.
+                // Happens in forks and when the user hasn't yet received a write bit on the repo.
+                assert_1.strict((_b = (_a = err.message) === null || _a === void 0 ? void 0 : _a.includes) === null || _b === void 0 ? void 0 : _b.call(_a, 'Reviews may only be requested from collaborators'), err);
+                core.info(`Ignoring error: ${util.inspect(err)}`);
+                return err;
             });
-            core.debug(JSON.stringify(requestReviewersResult));
+            core.debug(util.inspect(requestReviewersResult));
         }
     });
 }
 main().catch(err => {
-    core.debug(err.toString());
+    core.debug(util.inspect(err));
     core.setFailed(err.message);
 });
 
@@ -335,11 +344,6 @@ function getChangedFiles(client, base, head) {
         // Ensure that the request was successful.
         if (compareResponse.status !== 200) {
             throw new Error(`The GitHub API for comparing the base and head commits for this ${github.context.eventName} event returned ${compareResponse.status}, expected 200. ` +
-                "Please submit an issue on this action's GitHub repo.");
-        }
-        // Ensure that the head commit is ahead of the base commit.
-        if (compareResponse.data.status !== 'ahead') {
-            throw new Error(`The head commit for this ${github.context.eventName} event is not ahead of the base commit. ` +
                 "Please submit an issue on this action's GitHub repo.");
         }
         const changedFiles = compareResponse.data.files;
