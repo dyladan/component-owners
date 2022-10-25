@@ -28,6 +28,10 @@ components:
     - owner3
     - owner4
 
+  # Ownership can be assigned based on a file extension
+  "*.md":
+    - owner5
+
 # Optionally ignore some PR authors to reduce spam for your component owners
 ignored-authors:
   - dependabot
