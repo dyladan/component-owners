@@ -87,3 +87,4 @@ main().catch(err => {
     core.debug(util.inspect(err));
     core.setFailed(err.message);
 });
+
