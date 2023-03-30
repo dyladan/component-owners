@@ -53,6 +53,11 @@ function match(name: string, ownedPath: string): boolean {
     // Remove leading and trailing path separator
     ownedPath = ownedPath.replace(/^\//, "").replace(/\/$/, "");
 
+    if (ownedPath.startsWith("*.")) {
+      const extension = ownedPath.substring(1)
+      return name.endsWith(extension)
+    }
+
     const ownedPathParts = ownedPath.split(path.sep);
     const filePathParts = name.split(path.sep).slice(0, ownedPathParts.length);
 
