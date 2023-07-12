@@ -3,6 +3,11 @@ on:
   # pull_request_target is needed instead of just pull_request
   # because repository write permission is needed to assign reviewers
   pull_request_target:
+  
+permissions:
+  contents: read          # to read changed files
+  issues: write           # to read/write issue assignees
+  pull-requests: write    # to read/write PR reviewers
 
 jobs:
   run_self:
