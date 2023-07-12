@@ -48,6 +48,11 @@ on:
   # the github token will not have sufficient permission to update the PR.
   pull_request_target:
 
+permissions:
+  contents: read          # to read changed files
+  issues: write           # to read/write issue assignees
+  pull-requests: write    # to read/write PR reviewers
+
 jobs:
   run_self:
     runs-on: ubuntu-latest

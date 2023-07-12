@@ -14,8 +14,8 @@ async function main() {
 
     const { base, head } = getRefs();
 
-    core.debug(`Base commit: ${base}`)
-    core.debug(`Head commit: ${head}`)
+    core.debug(`Base commit: ${base}`);
+    core.debug(`Head commit: ${head}`);
 
     const configFile = await loadYaml(client, head, ownerFilePath);
     const config = validateConfig(configFile);
