@@ -31,47 +31,57 @@ async function main() {
 
     core.info(`${owners.length} owners found ${owners.join(' ')}`);
 
+    let owner_teams = new Set<string>();
+    let owner_users = new Set<string>();
+
+    owners.forEach(owner => {
+        if(owner.startsWith("/")) {
+            owner_teams.add(owner.slice(1));
+        } else {
+            owner_users.add(owner);
+        }
+    })
+
     if (assignOwners && owners.length > 0) {
         core.info('Adding assignees');
         const addAssigneesResult = await client.rest.issues.addAssignees({
             owner: github.context.repo.owner,
             repo: github.context.repo.repo,
             issue_number: github.context.issue.number,
-            assignees: owners,
+            assignees: Array.from(owner_users),
         });
         core.debug(util.inspect(addAssigneesResult));
     }
 
-
-    const reviewers = new Set<string>(owners);
-    if (reviewers.has(author) || reviewers.has(author.toLowerCase())) core.info('PR author is a component owner');
-    reviewers.delete(author);
-    reviewers.delete(author.toLowerCase());
+    if (owner_users.has(author) || owner_users.has(author.toLowerCase())) core.info('PR author is a component owner');
+    owner_users.delete(author);
+    owner_users.delete(author.toLowerCase());
 
     // Do not want to re-request when reviewers have already been requested
     const oldReviewers = await getReviewers(client);
     for (const reviewer of oldReviewers) {
         if (!reviewer) continue;
         core.info(`${reviewer.login} has already been requested`);
-        reviewers.delete(reviewer.login);
+        owner_users.delete(reviewer.login);
     }
 
     // Do not want to re-request when reviewers have already approved/rejected
     const previousReviews = await getReviews(client);
     for (const review of previousReviews) {
         if (!review.user) continue;
-        if (!reviewers.has(review.user.login)) continue;
+        if (!owner_users.has(review.user.login)) continue;
         core.info(`${review.user.login} has already reviewed`);
-        reviewers.delete(review.user.login);
+        owner_users.delete(review.user.login);
     }
 
-    if (requestOwnerReviews && reviewers.size > 0) {
+    if (requestOwnerReviews && (owner_users.size > 0 || owner_teams.size > 0)) {
         core.info('Adding reviewers');
         const requestReviewersResult = await client.rest.pulls.requestReviewers({
             owner: github.context.repo.owner,
             repo: github.context.repo.repo,
             pull_number: github.context.issue.number,
-            reviewers: Array.from(reviewers),
+            reviewers: Array.from(owner_users),
+            team_reviewers: Array.from(owner_teams),
         }).catch((err) => {
             // Ignore the case when the owner is not a collaborator.
             // Happens in forks and when the user hasn't yet received a write bit on the repo.
