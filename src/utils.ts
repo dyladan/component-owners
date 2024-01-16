@@ -145,7 +145,7 @@ export async function getReviewers(client: Client) {
         );
     }
 
-    return result.data.users;
+    return result.data;
 }
 
 export async function getReviews(client: Client) {
