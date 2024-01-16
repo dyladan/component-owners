@@ -85,11 +85,17 @@ function main() {
         owner_users.delete(author.toLowerCase());
         // Do not want to re-request when reviewers have already been requested
         const oldReviewers = yield utils_1.getReviewers(client);
-        for (const reviewer of oldReviewers) {
+        for (const reviewer of oldReviewers.users) {
             if (!reviewer)
                 continue;
             core.info(`${reviewer.login} has already been requested`);
             owner_users.delete(reviewer.login);
+        }
+        for (const reviewerTeam of oldReviewers.teams) {
+            if (!reviewerTeam)
+                continue;
+            core.info(`${reviewerTeam.slug} team has already been requested`);
+            owner_teams.delete(reviewerTeam.slug);
         }
         // Do not want to re-request when reviewers have already approved/rejected
         const previousReviews = yield utils_1.getReviews(client);
@@ -380,7 +386,7 @@ function getReviewers(client) {
         if (result.status !== 200) {
             throw new Error(`getReviewers failed ${result.status} ${github.context.issue.number}`);
         }
-        return result.data.users;
+        return result.data;
     });
 }
 exports.getReviewers = getReviewers;

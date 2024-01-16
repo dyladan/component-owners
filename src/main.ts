@@ -59,10 +59,17 @@ async function main() {
 
     // Do not want to re-request when reviewers have already been requested
     const oldReviewers = await getReviewers(client);
-    for (const reviewer of oldReviewers) {
+
+    for (const reviewer of oldReviewers.users) {
         if (!reviewer) continue;
         core.info(`${reviewer.login} has already been requested`);
         owner_users.delete(reviewer.login);
+    }
+
+    for (const reviewerTeam of oldReviewers.teams) {
+        if (!reviewerTeam) continue;
+        core.info(`${reviewerTeam.slug} team has already been requested`);
+        owner_teams.delete(reviewerTeam.slug);
     }
 
     // Do not want to re-request when reviewers have already approved/rejected
