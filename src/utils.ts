@@ -54,8 +54,8 @@ function match(name: string, ownedPath: string): boolean {
     ownedPath = ownedPath.replace(/^\//, "").replace(/\/$/, "");
 
     if (ownedPath.startsWith("*.")) {
-      const extension = ownedPath.substring(1)
-      return name.endsWith(extension)
+        const extension = ownedPath.substring(1)
+        return name.endsWith(extension)
     }
 
     const ownedPathParts = ownedPath.split(path.sep);
@@ -195,7 +195,12 @@ export async function loadYaml(client: Client, ref: string, location: string): P
     try {
         const contents = await getFileContents(client, ref, location);
         return yaml.load(contents, { filename: location });
-    } catch (err) {
-        throw new Error(`Failed to load configuration ${ref.slice(0, 7)} ${err.message} ${location}`)
+    } catch (err: unknown) {
+        if (err instanceof Error) {
+            throw new Error(`Failed to load configuration ${ref.slice(0, 7)} ${err.message} ${location}`)
+        }
+        else { 
+            throw new Error(`Failed to load configuration ${ref.slice(0, 7)} ${err} ${location}`)
+        }
     }
 }
