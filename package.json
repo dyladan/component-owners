@@ -18,17 +18,17 @@
   },
   "homepage": "https://github.com/dyladan/component-owners#readme",
   "devDependencies": {
-    "@types/js-yaml": "^4.0.2",
-    "@types/node": "^16.4.12",
-    "@vercel/ncc": "^0.29.0",
-    "rimraf": "^3.0.2",
-    "typescript": "^4.3.5"
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^20.14.1",
+    "@vercel/ncc": "^0.38.1",
+    "rimraf": "^5.0.7",
+    "typescript": "^5.4.5"
   },
   "dependencies": {
-    "@actions/core": "^1.4.0",
-    "@actions/github": "^5.0.0",
-    "fp-ts": "^2.11.1",
-    "io-ts": "^2.2.16",
+    "@actions/core": "^1.10.1",
+    "@actions/github": "^6.0.0",
+    "fp-ts": "^2.16.6",
+    "io-ts": "^2.2.21",
     "js-yaml": "^4.1.0"
   }
 }
