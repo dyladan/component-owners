@@ -32,6 +32,9 @@ components:
   "*.md":
     - owner5
 
+  # You also can assign ownership for a team
+  src/example.ts: org-name/team-name
+
 # Optionally ignore some PR authors to reduce spam for your component owners
 ignored-authors:
   - dependabot
@@ -84,7 +87,8 @@ Path to configuration file.
 
 GitHub personal access token.
 Must have permission to read and write pull requests.
-The default `github.token` is typically sufficient.
+
+**You must [generate your own access token](#using-own-access-token) if you plan to use it for teams ownership**, otherwise the default `github.token` is typically sufficient.
 
 ### `assign-owners`
 
@@ -97,6 +101,23 @@ Determines if the component owners should be added to the pull request as assign
 **default**: `true`
 
 Determines pull request reviews should be requested from component owners.
+
+## Using own access token
+
+If you want to use this action to assign reviews for teams, then `github.token` would not be sufficient and you need to generate a new one. 
+
+1. Just follow [Github's instructions](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token) and add a new token with the following set of permissions:
+
+![perm](https://github.com/volas/component-owners/assets/4064061/474022d1-820a-48c6-8100-a8553584e961)
+
+2. Create a [secret for your repository](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions#creating-secrets-for-a-repository), and place your token inside. Name it, for example, ``CODEOWNER_SECRET``.
+
+3. Use the newly created secret as the token in the action yml file:
+
+```
+          # default: ${{ github.token }}
+          repo-token: ${{ secrets.CODEOWNER_SECRET }}
+```
 
 ## Why not use CODEOWNERS?
 
