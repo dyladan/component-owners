@@ -34,9 +34,11 @@ async function main() {
     let owner_teams = new Set<string>();
     let owner_users = new Set<string>();
 
+    let team_prefix = github.context.repo.owner + "/";
+
     owners.forEach(owner => {
-        if(owner.startsWith("/")) {
-            owner_teams.add(owner.slice(1));
+        if(owner.startsWith(team_prefix)) {
+            owner_teams.add(owner.slice(team_prefix.length));
         } else {
             owner_users.add(owner);
         }
