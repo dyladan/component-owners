@@ -32,7 +32,7 @@ components:
   "*.md":
     - owner5
 
-  # You also can assign ownership for a team
+  # You also can assign ownership for a team (https://docs.github.com/en/organizations/organizing-members-into-teams/about-teams)
   src/example.ts: org-name/team-name
 
 # Optionally ignore some PR authors to reduce spam for your component owners
