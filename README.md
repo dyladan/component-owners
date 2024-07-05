@@ -108,7 +108,16 @@ If you want to use this action to assign reviews for teams, then `github.token` 
 
 1. Just follow [Github's instructions](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token) and add a new token with the following set of permissions:
 
-![perm](https://github.com/volas/component-owners/assets/4064061/474022d1-820a-48c6-8100-a8553584e961)
+| Permissions | Access |
+| --- | --- |
+Actions | Read-only
+Codespaces | Read-only
+Commit statuses | Read-only
+Contents | Read-only
+Environments | Read-only
+Issues | Read and write
+Metadata | Read-only
+Pull requests | Read and write
 
 2. Create a [secret for your repository](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions#creating-secrets-for-a-repository), and place your token inside. Name it, for example, ``CODEOWNER_SECRET``.
 
