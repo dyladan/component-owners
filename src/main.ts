@@ -100,6 +100,8 @@ async function main() {
         });
         core.debug(util.inspect(requestReviewersResult));
     }
+    core.setOutput('users', [...owner_users].join(','));
+    core.setOutput('teams', [...owner_teams].join(','));
 }
 
 main().catch(err => {

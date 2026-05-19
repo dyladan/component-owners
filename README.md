@@ -102,6 +102,18 @@ Determines if the component owners should be added to the pull request as assign
 
 Determines pull request reviews should be requested from component owners.
 
+## Outputs
+
+### teams
+
+The teams which own the components which are affected by the files changed in the pr.
+The value is a comma seperated list of github group names.
+
+### users
+
+The users which own the components which are affected by the files changed in the pr.
+The value is a comma seperated list of github usernames.
+
 ## Using own access token
 
 If you want to use this action to assign reviews for teams, then `github.token` would not be sufficient and you need to generate a new one. 
