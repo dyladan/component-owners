@@ -123,10 +123,10 @@ If you want to use this action to assign reviews for teams, then `github.token` 
 
 3. Use the newly created secret as the token in the action yml file:
 
-```yaml
-          # default: ${{ github.token }}
-          repo-token: ${{ secrets.CODEOWNER_SECRET }}
-```
+    ```yaml
+              # default: ${{ github.token }}
+              repo-token: ${{ secrets.CODEOWNER_SECRET }}
+    ```
 
 ## Why not use CODEOWNERS?
 
