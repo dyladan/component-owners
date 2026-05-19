@@ -104,26 +104,26 @@ Determines pull request reviews should be requested from component owners.
 
 ## Using own access token
 
-If you want to use this action to assign reviews for teams, then `github.token` would not be sufficient and you need to generate a new one. 
+If you want to use this action to assign reviews for teams, then `github.token` would not be sufficient and you need to generate a new one.
 
 1. Just follow [Github's instructions](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token) and add a new token with the following set of permissions:
 
-| Permissions | Access |
-| --- | --- |
-Actions | Read-only
-Codespaces | Read-only
-Commit statuses | Read-only
-Contents | Read-only
-Environments | Read-only
-Issues | Read and write
-Metadata | Read-only
-Pull requests | Read and write
+    | Permissions | Access |
+    | --- | --- |
+    | Actions | Read-only |
+    | Codespaces | Read-only |
+    | Commit statuses | Read-only |
+    | Contents | Read-only |
+    | Environments | Read-only |
+    | Issues | Read and write |
+    | Metadata | Read-only |
+    | Pull requests | Read and write |
 
 2. Create a [secret for your repository](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions#creating-secrets-for-a-repository), and place your token inside. Name it, for example, ``CODEOWNER_SECRET``.
 
 3. Use the newly created secret as the token in the action yml file:
 
-```
+```yaml
           # default: ${{ github.token }}
           repo-token: ${{ secrets.CODEOWNER_SECRET }}
 ```
