@@ -1,0 +1,42 @@
+name: Check dist
+
+# Rebuilds dist/ from the TypeScript sources and fails if the result differs
+# from what is committed. This catches PRs that forget to rebuild dist/ and
+# PRs that change dist/ without a matching change in src/.
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  check-dist:
+    runs-on: ubuntu-latest
+    name: Check dist is up to date
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build dist
+        run: npm run compile
+
+      - name: Compare dist with committed version
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "::error::Building from source produced changes. Run 'npm ci && npm run compile' and commit the result."
+            git status --porcelain
+            git diff --stat
+            exit 1
+          fi
