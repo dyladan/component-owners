@@ -1,13 +1,4 @@
 # Learn about the CODEOWNERS file format:
 #  https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
-#
-# These paths control what code the action runs and how it is checked.
-# Changes to them need review from a code owner when branch protection
-# requires code owner review.
 
-# Workflows (including the dist check), this file, and the action's own config
-/.github/ @dyladan
-
-# The code that actually runs, and the file that points to it
-/dist/ @dyladan
-/action.yml @dyladan
+* @dyladan
