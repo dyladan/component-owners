@@ -64,7 +64,9 @@ function main() {
         const { base, head } = (0, utils_1.getRefs)();
         core.debug(`Base commit: ${base}`);
         core.debug(`Head commit: ${head}`);
-        const configFile = yield (0, utils_1.loadYaml)(client, head, ownerFilePath);
+        core.debug(`PR?: ${github.context.payload.pull_request}`);
+        const configRef = github.context.payload.pull_request ? base : head;
+        const configFile = yield (0, utils_1.loadYaml)(client, configRef, ownerFilePath);
         const config = (0, config_1.validateConfig)(configFile);
         const author = yield (0, utils_1.getPullAuthor)(client);
         if (config.ignoredAuthors.has(author)) {
