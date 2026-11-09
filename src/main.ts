@@ -16,8 +16,10 @@ async function main() {
 
     core.debug(`Base commit: ${base}`);
     core.debug(`Head commit: ${head}`);
+    core.debug(`PR?: ${github.context.payload.pull_request}`)
+    const configRef = github.context.payload.pull_request ? base : head;
 
-    const configFile = await loadYaml(client, head, ownerFilePath);
+    const configFile = await loadYaml(client, configRef, ownerFilePath);
     const config = validateConfig(configFile);
 
     const author = await getPullAuthor(client);
